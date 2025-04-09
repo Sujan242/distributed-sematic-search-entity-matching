@@ -1,0 +1,4 @@
+torch
+pandas
+sentence_transformers
+faiss-cpu
