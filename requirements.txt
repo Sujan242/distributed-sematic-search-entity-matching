@@ -1,2 +1,3 @@
 torch
 pandas
+sentence_transformers

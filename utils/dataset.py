@@ -40,14 +40,15 @@ class GoogleDataset(BaseDataset):
         description = self.df.iloc[idx]['description']
         manufacturer = self.df.iloc[idx]['manufacturer']
         price = self.df.iloc[idx]['price']
+
         string_representation = ""
-        if title is not None:
+        if not pd.isna(title):
             string_representation += f"The product is {title}. "
-        if manufacturer is not None:
+        if not pd.isna(manufacturer):
             string_representation += f"It is manufactured by {manufacturer}. "
-        if price is not 0:
+        if price != 0:
             string_representation += f"The price is {price}. "
-        if description is not None:
+        if not pd.isna(description):
             string_representation += f"The description is {description}. "
 
         return {
