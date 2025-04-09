@@ -1,29 +1,17 @@
-import os
 import argparse
-
-from torch.utils.data import DataLoader
-
-from utils.dataset import AmazonDataset, BaseDataset, GoogleDataset
-from utils.embedding_model import SentenceTransformerEmbeddingModel, EmbeddingModel
+import os
 import time
-import faiss
-from faiss import Index
 
-
-def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index: Index):
-    dataloader = DataLoader(dataset, batch_size=batch_size)
-    for batch in dataloader:
-        ids = batch['id']
-        sentences = batch['text']
-        embeddings = embedding_model.get_embedding(sentences)
-        faiss_index.add(embeddings.cpu().numpy())
-
+from utils.dataset import AmazonDataset, GoogleDataset
+from utils.embedding_model import SentenceTransformerEmbeddingModel
+from utils.index import get_index
+from utils.index_utils import build_index, search_index
 
 if __name__ == "__main__":
 
     blocking_start = time.time()
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', type=int, default=128, help='Batch size for DataLoader')
+    parser.add_argument('--batch_size', type=int, default=1, help='Batch size for DataLoader')
     args = parser.parse_args()
     batch_size = args.batch_size
 
@@ -35,15 +23,26 @@ if __name__ == "__main__":
 
     # build index for table-A
     embedding_model = SentenceTransformerEmbeddingModel("sentence-transformers/all-MiniLM-L6-v2")
-    faiss_index = faiss.IndexFlatL2(384)
+    faiss_index = get_index(384)
 
     build_start_time = time.time()
-    build_index(amazon_dataset, batch_size, embedding_model, faiss_index)
+    tableA_ids = build_index(amazon_dataset, batch_size, embedding_model, faiss_index)
     build_end_time = time.time()
 
+    index_search_start_time = time.time()
 
-
+    # de
+    # search index for table-B
+    matches = search_index(dataset=google_dataset,
+                           batch_size=batch_size,
+                           embedding_model=embedding_model,
+                           faiss_index=faiss_index,
+                           top_k=5,
+                           tableA_ids=tableA_ids
+    )
+    index_search_end_time = time.time()
 
     blocking_end = time.time()
     print("Build time: ", build_end_time - build_start_time)
     print("Blocking time: ", blocking_end - blocking_start)
+    print("Index search time: ", index_search_end_time - index_search_start_time)

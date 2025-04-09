@@ -36,7 +36,7 @@ class AmazonDataset(BaseDataset):
 class GoogleDataset(BaseDataset):
     def __getitem__(self, idx):
         id=self.df.iloc[idx]['id']
-        title = self.df.iloc[idx]['title']
+        title = self.df.iloc[idx]['name']
         description = self.df.iloc[idx]['description']
         manufacturer = self.df.iloc[idx]['manufacturer']
         price = self.df.iloc[idx]['price']
