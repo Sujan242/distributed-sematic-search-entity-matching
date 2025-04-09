@@ -1,9 +1,11 @@
 import argparse
 import os
 import time
+import pandas as pd
 
 from utils.dataset import AmazonDataset, GoogleDataset
 from utils.embedding_model import SentenceTransformerEmbeddingModel
+from utils.evaluate_utils import evaluate
 from utils.index import get_index
 from utils.index_utils import build_index, search_index
 
@@ -43,6 +45,12 @@ if __name__ == "__main__":
     index_search_end_time = time.time()
 
     blocking_end = time.time()
-    print("Build time: ", build_end_time - build_start_time)
-    print("Blocking time: ", blocking_end - blocking_start)
+    print("Build Index time: ", build_end_time - build_start_time)
     print("Index search time: ", index_search_end_time - index_search_start_time)
+    print("Blocking time: ", blocking_end - blocking_start)
+
+    # evaluate the results
+    perfect_mapping_path = os.path.join(data_path, "amazon_google/Amzon_GoogleProducts_perfectMapping.csv")
+    perfect_mapping_df = pd.read_csv(perfect_mapping_path)
+    ground_truth = dict(zip(perfect_mapping_df['idGoogleBase'], perfect_mapping_df['idAmazon']))
+    evaluate(matches, ground_truth)

@@ -33,7 +33,7 @@ def search_index(dataset: BaseDataset, batch_size: int,
 
         embeddings = embeddings.cpu().numpy()
 
-        distances, indices = faiss_index.search(embeddings, top_k)
+        distances, indices = faiss_index.search(x=embeddings, k=top_k)
 
         for i, id in enumerate(ids):
             tableA_matches = [tableA_ids[idx] for idx in indices[i]]
