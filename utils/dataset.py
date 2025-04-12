@@ -25,8 +25,8 @@ class AmazonDataset(BaseDataset):
             string_representation += f"It is manufactured by {manufacturer}. "
         if price != 0:
             string_representation += f"The price is {price}. "
-        if not pd.isna(description):
-            string_representation += f"The description is {description}. "
+        # if not pd.isna(description):
+        #     string_representation += f"The description is {description}. "
 
         return {
             'id': id,
@@ -48,8 +48,8 @@ class GoogleDataset(BaseDataset):
             string_representation += f"It is manufactured by {manufacturer}. "
         if price != 0:
             string_representation += f"The price is {price}. "
-        if not pd.isna(description):
-            string_representation += f"The description is {description}. "
+        # if not pd.isna(description):
+        #     string_representation += f"The description is {description}. "
 
         return {
             'id': id,
