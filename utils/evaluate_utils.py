@@ -22,5 +22,9 @@ def evaluate(matches, ground_truth):
     # Recall = How many of the true matches we found
     recall = total_correct / total_true if total_true > 0 else 0.0
 
+    # f-1 score
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+
     print(f"Precision: {precision:.4f}")
     print(f"Recall: {recall:.4f}")
+    print(f"F1 Score: {f1:.4f}")
