@@ -1,5 +1,5 @@
 torch
 pandas
 sentence_transformers
-faiss-gpu
+faiss-gpu-cu12
 numpy==1.26.4
