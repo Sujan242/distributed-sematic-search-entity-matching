@@ -11,6 +11,7 @@ from utils.index_utils import build_index, search_index
 
 if __name__ == "__main__":
 
+    print("Start blocking...")
     blocking_start = time.time()
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size for DataLoader')
@@ -24,14 +25,17 @@ if __name__ == "__main__":
     google_dataset = GoogleDataset(os.path.join(data_path, "amazon_google/GoogleProducts.csv"))
 
     # build index for table-A
-    embedding_model = SentenceTransformerEmbeddingModel("sentence-transformers/all-MiniLM-L6-v2")
-    faiss_index = get_index(384)
+    embedding_model = SentenceTransformerEmbeddingModel("BAAI/bge-large-en-v1.5")
+    faiss_index = get_index(1024)
 
+    print("Start building index...")
     build_start_time = time.time()
     tableA_ids = build_index(amazon_dataset, batch_size, embedding_model, faiss_index)
     build_end_time = time.time()
 
     index_search_start_time = time.time()
+
+    print("Start searching...")
 
     # de
     # search index for table-B
@@ -39,7 +43,7 @@ if __name__ == "__main__":
                            batch_size=batch_size,
                            embedding_model=embedding_model,
                            faiss_index=faiss_index,
-                           top_k=5,
+                           top_k=10,
                            tableA_ids=tableA_ids
     )
     index_search_end_time = time.time()
