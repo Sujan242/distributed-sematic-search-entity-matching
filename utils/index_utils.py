@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 import faiss
 from utils.dataset import BaseDataset
 from utils.embedding_model import EmbeddingModel
-import faiss.contrib.torch_utils
+import faiss.contrib.torch_utils # need this for GPU support even though you don't use it
 
 def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index):
     dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True)

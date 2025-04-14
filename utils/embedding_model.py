@@ -45,10 +45,7 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
         # Normalize embeddings
         embeddings = F.normalize(embeddings, p=2, dim=1)
 
-        if self.device == 'cuda':
-            return embeddings
-        else:
-            return embeddings.cpu().numpy()
+        return embeddings
 
 def _mean_pooling(model_output, attention_mask):
     token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
