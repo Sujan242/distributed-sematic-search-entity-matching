@@ -32,17 +32,16 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def get_embedding(self, sentences: List[str]):
-        # Tokenize sentences
+        """
+        Reference: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+        """
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to(self.device)
 
-        # Compute token embeddings
         with torch.no_grad():
             model_output = self.model(**encoded_input)
 
-        # Perform pooling
         embeddings = _mean_pooling(model_output, encoded_input['attention_mask'])
 
-        # Normalize embeddings
         embeddings = F.normalize(embeddings, p=2, dim=1)
 
         return embeddings
