@@ -55,17 +55,3 @@ class GoogleDataset(BaseDataset):
             'id': id,
             'text': string_representation
         }
-
-
-if __name__ == '__main__':
-    # get current directoru
-
-    cwd = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(cwd, '../data/amazon_google/Amazon.csv')
-    amazon_dataset = AmazonDataset(data_path)
-
-    # create a dataloader of batch size = 128
-    amazon_dataloader = DataLoader(amazon_dataset, batch_size=128)
-    for i, data in enumerate(amazon_dataloader):
-        print(data)
-        break
