@@ -1,7 +1,8 @@
 from abc import abstractmethod
-from sentence_transformers import SentenceTransformer
 from typing import List
+from transformers import AutoTokenizer, AutoModel
 import torch
+import torch.nn.functional as F
 
 class EmbeddingModel:
 
@@ -23,17 +24,33 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
         if torch.cuda.is_available():
             print(f"Using GPU for embedding: {torch.cuda.get_device_name(0)}")
             self.device = 'cuda'
-            print("Using device: ", self.device)
         else:
             print("Using CPU for embedding")
             self.device = 'cpu'
 
-        self.model = SentenceTransformer(model_name, device=self.device)
+        self.model = AutoModel.from_pretrained(model_name).to(self.device)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def get_embedding(self, sentences: List[str]):
-        # TODO split across GPUs
-        return self.model.encode(sentences,
-                                 convert_to_tensor=True,
-                                 batch_size=len(sentences),
-                                 device=self.device
-                                 )
+        # Tokenize sentences
+        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to(self.device)
+
+        # Compute token embeddings
+        with torch.no_grad():
+            model_output = self.model(**encoded_input)
+
+        # Perform pooling
+        embeddings = _mean_pooling(model_output, encoded_input['attention_mask'])
+
+        # Normalize embeddings
+        embeddings = F.normalize(embeddings, p=2, dim=1)
+
+        if self.device == 'cuda':
+            return embeddings
+        else:
+            return embeddings.cpu().numpy()
+
+def _mean_pooling(model_output, attention_mask):
+    token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
