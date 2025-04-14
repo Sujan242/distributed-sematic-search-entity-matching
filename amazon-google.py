@@ -11,12 +11,13 @@ from utils.index_utils import build_index, search_index
 
 if __name__ == "__main__":
 
-    print("Start blocking...")
     blocking_start = time.time()
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size for DataLoader')
     args = parser.parse_args()
     batch_size = args.batch_size
+
+    print("Start blocking for batch size: ", batch_size)
 
     # load Table A
     cwd = os.path.dirname(os.path.abspath(__file__))
