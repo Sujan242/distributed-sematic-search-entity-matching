@@ -6,7 +6,8 @@ def get_index(dim):
     if torch.cuda.is_available():
         print("Using GPU for FAISS index")
         res = faiss.StandardGpuResources()
-        return faiss.GpuIndexFlatL2(res, dim)
-
-    print("Using CPU for FAISS index")
-    return faiss.IndexFlatL2(dim)
+        index = faiss.GpuIndexFlatIP(res, dim)
+    else:
+        print("Using CPU for FAISS index")
+        index = faiss.IndexFlatIP(dim)
+    return index

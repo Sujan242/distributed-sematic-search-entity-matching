@@ -26,3 +26,4 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     print("Blocking time: ", blocking_end - blocking_start)
     # evaluate the results
     evaluate(matches, ground_truth)
+    print("Candidate size = ", len(second_dataset)*top_k)
