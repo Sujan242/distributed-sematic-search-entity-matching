@@ -28,8 +28,8 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
             print("Using CPU for embedding")
             self.device = 'cpu'
 
-        self.model = AutoModel.from_pretrained(model_name).to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name,trust_remote_code=True ).to(self.device)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
 
     def get_embedding(self, sentences: List[str]):
         """

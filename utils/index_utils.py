@@ -2,17 +2,24 @@ from torch.utils.data import DataLoader
 import faiss
 from utils.dataset import BaseDataset
 from utils.embedding_model import EmbeddingModel
+import torch
 import faiss.contrib.torch_utils # need this for GPU support even though you don't use it
 
 def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index):
     dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True)
     tableA_ids = []
+    all_embeddings = []
     for batch in dataloader:
         ids = batch['id']
         sentences = batch['text']
         embeddings = embedding_model.get_embedding(sentences)
-        faiss_index.add(embeddings)
+        all_embeddings.append(embeddings)
         tableA_ids.extend(ids)
+
+    all_embeddings = torch.cat(all_embeddings, dim=0)
+    all_embeddings = all_embeddings.contiguous()
+    faiss_index.train(all_embeddings)
+    faiss_index.add(all_embeddings)
     return tableA_ids
 
 
