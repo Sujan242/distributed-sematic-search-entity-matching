@@ -1,6 +1,7 @@
 import argparse
 import os
 import pandas as pd
+from torch.nn.functional import embedding
 
 from utils.blocking import block
 from utils.dataset import AmazonDataset, GoogleDataset
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     ground_truth = dict(zip(perfect_mapping_df['idAmazon'],perfect_mapping_df['idGoogleBase']))
 
     # build index for table-A
-    embedding_model = SentenceTransformerEmbeddingModel("BAAI/bge-large-en-v1.5")
+    embedding_model = SentenceTransformerEmbeddingModel("Alibaba-NLP/gte-large-en-v1.5")
     faiss_index = get_index(1024)
 
     block(google_dataset,
