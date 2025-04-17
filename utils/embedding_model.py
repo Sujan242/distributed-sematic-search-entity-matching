@@ -7,7 +7,7 @@ import torch.nn.functional as F
 class EmbeddingModel:
 
     @abstractmethod
-    def get_embedding(self, sentences: List[str]):
+    def get_embedding(self, encoded_input):
         """
         Get the embedding for the given sentences.
 
@@ -29,14 +29,12 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
             self.device = 'cpu'
 
         self.model = AutoModel.from_pretrained(model_name,trust_remote_code=True ).to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
 
-    def get_embedding(self, sentences: List[str]):
+
+    def get_embedding(self, encoded_input):
         """
         Reference: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
         """
-        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to(self.device)
-
         with torch.no_grad():
             model_output = self.model(**encoded_input)
 

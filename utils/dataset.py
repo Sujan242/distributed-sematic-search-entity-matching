@@ -4,8 +4,9 @@ import os
 
 class BaseDataset(Dataset):
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, tokenizer):
         self.df = pd.read_csv(file_path, encoding='latin1')
+        self.tokenizer = tokenizer
 
     def __len__(self):
         return len(self.df)
@@ -28,9 +29,11 @@ class AmazonDataset(BaseDataset):
         # if not pd.isna(description):
         #     string_representation += f"The description is {description}. "
 
+        input_ids = self.tokenizer.encode(string_representation, return_tensors='pt', truncation=True).squeeze()
+
         return {
             'id': id,
-            'text': string_representation
+            'input_ids': input_ids
         }
 
 class GoogleDataset(BaseDataset):
@@ -51,7 +54,9 @@ class GoogleDataset(BaseDataset):
         # if not pd.isna(description):
         #     string_representation += f"The description is {description}. "
 
+        input_ids = self.tokenizer.encode(string_representation, return_tensors='pt', truncation=True).squeeze()
+
         return {
             'id': id,
-            'text': string_representation
+            'input_ids': input_ids
         }

@@ -1,7 +1,7 @@
 import argparse
 import os
 import pandas as pd
-from torch.nn.functional import embedding
+from transformers import AutoTokenizer
 
 from utils.blocking import block
 from utils.dataset import AmazonDataset, GoogleDataset
@@ -15,21 +15,26 @@ if __name__ == "__main__":
     args = parser.parse_args()
     batch_size = args.batch_size
 
-    print("Start blocking for batch size: ", batch_size)
-
-    # load Table A
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, 'data')
 
-    amazon_dataset = AmazonDataset(os.path.join(data_path, "amazon_google/Amazon.csv"))
-    google_dataset = GoogleDataset(os.path.join(data_path, "amazon_google/GoogleProducts.csv"))
+    print("Start blocking for batch size: ", batch_size)
+
+
+    model_name = "Alibaba-NLP/gte-large-en-v1.5"
+    embedding_dim = 1024
+    # model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    # embedding_dim = 384
+    embedding_model = SentenceTransformerEmbeddingModel(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+
+    amazon_dataset = AmazonDataset(os.path.join(data_path, "amazon_google/Amazon.csv"), tokenizer)
+    google_dataset = GoogleDataset(os.path.join(data_path, "amazon_google/GoogleProducts.csv"), tokenizer)
     perfect_mapping_path = os.path.join(data_path, "amazon_google/Amzon_GoogleProducts_perfectMapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
     ground_truth = dict(zip(perfect_mapping_df['idAmazon'],perfect_mapping_df['idGoogleBase']))
 
-    # build index for table-A
-    embedding_model = SentenceTransformerEmbeddingModel("Alibaba-NLP/gte-large-en-v1.5")
-    faiss_index = get_index(1024)
+    faiss_index = get_index(embedding_dim)
 
     block(google_dataset,
           amazon_dataset,
@@ -37,5 +42,6 @@ if __name__ == "__main__":
           faiss_index,
           batch_size,
           ground_truth,
-          top_k=10
+          tokenizer,
+          top_k=10,
           )
