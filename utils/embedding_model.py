@@ -35,6 +35,7 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
         """
         Reference: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
         """
+        encoded_input = {k: v.to(self.device) for k, v in encoded_input.items() if k in ['input_ids', 'attention_mask']}
         with torch.no_grad():
             model_output = self.model(**encoded_input)
 

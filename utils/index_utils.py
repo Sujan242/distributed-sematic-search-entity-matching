@@ -12,7 +12,6 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
     all_embeddings = []
     for batch in dataloader:
         ids = batch['id']
-        batch.pop('id')
         embeddings = embedding_model.get_embedding(batch)
         all_embeddings.append(embeddings)
         tableA_ids.extend(ids)
@@ -35,7 +34,6 @@ def search_index(dataset: BaseDataset, batch_size: int,
 
     for batch in dataloader:
         ids = batch['id']
-        batch.pop('id')
         embeddings = embedding_model.get_embedding(batch)
 
         distances, indices = faiss_index.search(embeddings, top_k)
