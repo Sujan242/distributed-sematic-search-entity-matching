@@ -20,15 +20,22 @@ class EmbeddingModel:
         pass
 
 class SentenceTransformerEmbeddingModel(EmbeddingModel):
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, device_ids: List[int] = None):
         if torch.cuda.is_available():
             print(f"Using GPU for embedding: {torch.cuda.get_device_name(0)}")
             self.device = 'cuda'
+            self.device_ids = device_ids
         else:
             print("Using CPU for embedding")
             self.device = 'cpu'
 
-        self.model = AutoModel.from_pretrained(model_name,trust_remote_code=True ).to(self.device)
+        model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+
+        if len(self.device_ids) > 1:
+            self.model = torch.nn.DataParallel(model, device_ids=self.device_ids)
+
+        self.model = self.model.to(self.device)
+
 
 
     def get_embedding(self, encoded_input):
