@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size for DataLoader')
     parser.add_argument('--gpus', type=int, nargs='+', default=[0], help='GPU Ids')
+    parser.add_argument('--topk', type=int, default=10, help='Top k for faiss retrieval')
     args = parser.parse_args()
     batch_size = args.batch_size
 
@@ -45,5 +46,6 @@ if __name__ == "__main__":
           batch_size,
           ground_truth,
           tokenizer,
-          top_k=10,
+          args.topk,
+          args.gpus
           )

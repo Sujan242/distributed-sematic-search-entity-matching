@@ -1,9 +1,12 @@
 import time
 
+import faiss
+
 from utils.index_utils import build_index, search_index
 from utils.evaluate_utils import evaluate
 
 from transformers import DataCollatorWithPadding
+import torch
 
 class CollatorWithID:
     def __init__(self, tokenizer):
@@ -15,7 +18,7 @@ class CollatorWithID:
         batch['id'] = ids                      # reattach ids
         return batch
 
-def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k):
+def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k, gpus):
     blocking_start = time.time()
     collator = CollatorWithID(tokenizer=tokenizer)
     print("Start building index...")
@@ -23,6 +26,12 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     tableA_ids = build_index(first_dataset, batch_size, embedding_model, faiss_index, collator)
     build_end_time = time.time()
     index_search_start_time = time.time()
+
+    # if multiple GPUs are available, replicate index across GPUs
+    if torch.cuda.is_available() and len(gpus) > 1:
+        faiss_cpu_index = faiss_index.index_gpu_to_cpu()
+        faiss_index = faiss.index_cpu_to_gpus_list(faiss_cpu_index, gpus)
+
     print("Start searching...")
     # de
     # search index for table-B

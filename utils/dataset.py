@@ -15,7 +15,6 @@ class AmazonDataset(BaseDataset):
     def __getitem__(self, idx):
         id = self.df.iloc[idx]['id']
         title = self.df.iloc[idx]['title']
-        description = self.df.iloc[idx]['description']
         manufacturer = self.df.iloc[idx]['manufacturer']
         price = self.df.iloc[idx]['price']
 
@@ -26,8 +25,6 @@ class AmazonDataset(BaseDataset):
             string_representation += f"It is manufactured by {manufacturer}. "
         if price != 0:
             string_representation += f"The price is {price}. "
-        # if not pd.isna(description):
-        #     string_representation += f"The description is {description}. "
 
         input_ids = self.tokenizer.encode(string_representation, return_tensors='pt', truncation=True).squeeze()
 
@@ -40,7 +37,6 @@ class GoogleDataset(BaseDataset):
     def __getitem__(self, idx):
         id=self.df.iloc[idx]['id']
         title = self.df.iloc[idx]['name']
-        description = self.df.iloc[idx]['description']
         manufacturer = self.df.iloc[idx]['manufacturer']
         price = self.df.iloc[idx]['price']
 
@@ -51,8 +47,6 @@ class GoogleDataset(BaseDataset):
             string_representation += f"It is manufactured by {manufacturer}. "
         if price != 0:
             string_representation += f"The price is {price}. "
-        # if not pd.isna(description):
-        #     string_representation += f"The description is {description}. "
 
         input_ids = self.tokenizer.encode(string_representation, return_tensors='pt', truncation=True).squeeze()
 
