@@ -29,11 +29,12 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
 
     # if multiple GPUs are available, replicate index across GPUs
     if torch.cuda.is_available() and len(gpus) > 1:
-        faiss_cpu_index = faiss_index.index_gpu_to_cpu()
-        faiss_index = faiss.index_cpu_to_gpus_list(faiss_cpu_index, gpus)
+        cloner_options = faiss.GpuMultipleClonerOptions()
+        cloner_options.shard = False
+        faiss_cpu_index = faiss.index_gpu_to_cpu(faiss_index)
+        faiss_index = faiss.index_cpu_to_gpus_list(faiss_cpu_index, gpus=gpus, co=cloner_options)
 
     print("Start searching...")
-    # de
     # search index for table-B
     matches = search_index(dataset=second_dataset,
                            batch_size=batch_size,

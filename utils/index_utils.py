@@ -34,7 +34,7 @@ def search_index(dataset: BaseDataset, batch_size: int,
 
     for batch in dataloader:
         ids = batch['id']
-        embeddings = embedding_model.get_embedding(batch)
+        embeddings = embedding_model.get_embedding(batch).cpu() # TODO avoid CPU transfer here
 
         distances, indices = faiss_index.search(embeddings, top_k)
 
