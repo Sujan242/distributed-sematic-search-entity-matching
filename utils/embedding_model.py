@@ -29,12 +29,12 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
             print("Using CPU for embedding")
             self.device = 'cpu'
 
-        model = AutoModel.from_pretrained(model_name,
+        self.model = AutoModel.from_pretrained(model_name,
                                           trust_remote_code=True,
                                           torch_dtype=torch.float16 if use_fp16 else torch.float32)
 
-        if len(self.device_ids) > 1:
-            self.model = torch.nn.DataParallel(model, device_ids=self.device_ids)
+        if len(device_ids) > 1:
+            self.model = torch.nn.DataParallel(self.model, device_ids=device_ids)
 
         self.model = self.model.to(self.device)
 

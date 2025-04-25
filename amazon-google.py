@@ -23,7 +23,7 @@ if __name__ == "__main__":
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, 'data')
 
-    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}")
+    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
 
     embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
     tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)

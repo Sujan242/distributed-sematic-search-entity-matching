@@ -1,6 +1,6 @@
 # Entity Matching with Sentence Transformers and FAISS
 
-This project performs blocking for entity matching between any two datasets, using sentence-transformer embeddings and FAISS-based approximate nearest neighbor search.
+This project performs blocking for entity matching between any two datasets, using LLM embeddings and FAISS-based approximate nearest neighbor search.
 
 ---
 
