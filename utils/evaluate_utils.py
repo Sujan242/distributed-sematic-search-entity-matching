@@ -1,9 +1,15 @@
+import csv
+
+
 def evaluate(matches, ground_truth):
 
     # Step 2: Compute Precision and Recall
     total_correct = 0
     total_predicted = 0
     total_true = len(ground_truth)
+
+    groundTruthMatches = []
+    fieldnames = ['googleId', 'predictedId', 'check']
 
     for google_id, predicted_amazon_ids in matches.items():
         true_amazon_id = ground_truth.get(google_id)
@@ -13,8 +19,21 @@ def evaluate(matches, ground_truth):
 
         total_predicted += len(predicted_amazon_ids)
 
-        if true_amazon_id in predicted_amazon_ids:
-            total_correct += 1  # We found the true match!
+        for predicted_amazon_id in predicted_amazon_ids:
+            groundTruthMatches.append(
+                {
+                    'googleId': google_id,
+                    'predictedId': predicted_amazon_id,
+                    'check': true_amazon_id == predicted_amazon_id
+                }
+            )
+            if true_amazon_id == predicted_amazon_id:
+                total_correct += 1  # We found the true match!
+
+    with open('ground_truth_matches.csv', 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(groundTruthMatches)
 
     # Precision = How many of our predictions were correct
     precision = total_correct / total_predicted if total_predicted > 0 else 0.0

@@ -1,3 +1,5 @@
+import csv
+
 from torch.utils.data import DataLoader
 import faiss
 from utils.dataset import BaseDataset
@@ -30,17 +32,40 @@ def search_index(dataset: BaseDataset, batch_size: int,
     dataloader = DataLoader(dataset, batch_size=batch_size)
 
     matches = {}
+    matchData = []
 
     for batch in dataloader:
         ids = batch['id']
+        # print(f"DEBUG: shape(ids)={len(ids)}")
         sentences = batch['text']
 
         embeddings = embedding_model.get_embedding(sentences)
 
         distances, indices = faiss_index.search(embeddings, top_k)
+        # print(f'DEBUG: shape(distances)={distances.shape}, shape(indices)={indices.shape}')
 
         for i, id in enumerate(ids):
             tableA_matches = [tableA_ids[idx] for idx in indices[i]]
+            # print(f"DEBUG: --- i={i}, id={id}, tableA_matches={tableA_matches}")
             matches[id] = tableA_matches
+
+            # print(f"DEBUG: shape(tableA_matches)={len(tableA_matches)}")
+
+            for k in range(len(tableA_matches)):
+                matchData.append({
+                    'id': id,
+                    'matchNum': k,
+                    'matchIdx': int(indices[i][k]),
+                    'distance': float(distances[i][k]),
+                    'matchId': tableA_matches[k]
+                })
+                print(f"DEBUG: record={matchData[-1]}")
+
+        fieldnames = ['id', 'matchNum', 'matchIdx', 'distance', 'matchId']
+
+        with open('match_details.csv', 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(matchData)
 
     return matches
