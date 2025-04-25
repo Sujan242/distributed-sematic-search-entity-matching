@@ -5,14 +5,14 @@ from utils.embedding_model import EmbeddingModel
 import torch
 import faiss.contrib.torch_utils # need this for GPU support even though you don't use it
 
-def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index):
-    dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True)
+def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index, collator):
+
+    dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True, collate_fn=collator)
     tableA_ids = []
     all_embeddings = []
     for batch in dataloader:
         ids = batch['id']
-        sentences = batch['text']
-        embeddings = embedding_model.get_embedding(sentences)
+        embeddings = embedding_model.get_embedding(batch)
         all_embeddings.append(embeddings)
         tableA_ids.extend(ids)
 
@@ -26,16 +26,15 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
 def search_index(dataset: BaseDataset, batch_size: int,
                  embedding_model: EmbeddingModel, faiss_index,
                  top_k: int = 5,
-                 tableA_ids: list = None):
-    dataloader = DataLoader(dataset, batch_size=batch_size)
+                 tableA_ids: list = None,
+                 collator=None):
+    dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True, collate_fn=collator)
 
     matches = {}
 
     for batch in dataloader:
         ids = batch['id']
-        sentences = batch['text']
-
-        embeddings = embedding_model.get_embedding(sentences)
+        embeddings = embedding_model.get_embedding(batch)
 
         distances, indices = faiss_index.search(embeddings, top_k)
 

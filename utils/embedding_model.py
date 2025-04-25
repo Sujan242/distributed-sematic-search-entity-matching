@@ -7,7 +7,7 @@ import torch.nn.functional as F
 class EmbeddingModel:
 
     @abstractmethod
-    def get_embedding(self, sentences: List[str]):
+    def get_embedding(self, encoded_input):
         """
         Get the embedding for the given sentences.
 
@@ -20,23 +20,31 @@ class EmbeddingModel:
         pass
 
 class SentenceTransformerEmbeddingModel(EmbeddingModel):
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, device_ids: List[int] = None, use_fp16: bool = False):
         if torch.cuda.is_available():
             print(f"Using GPU for embedding: {torch.cuda.get_device_name(0)}")
             self.device = 'cuda'
+            self.device_ids = device_ids
         else:
             print("Using CPU for embedding")
             self.device = 'cpu'
 
-        self.model = AutoModel.from_pretrained(model_name,trust_remote_code=True ).to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
+        self.model = AutoModel.from_pretrained(model_name,
+                                          trust_remote_code=True,
+                                          torch_dtype=torch.float16 if use_fp16 else torch.float32)
 
-    def get_embedding(self, sentences: List[str]):
+        if len(device_ids) > 1:
+            self.model = torch.nn.DataParallel(self.model, device_ids=device_ids)
+
+        self.model = self.model.to(self.device)
+
+
+
+    def get_embedding(self, encoded_input):
         """
         Reference: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
         """
-        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to(self.device)
-
+        encoded_input = {k: v.to(self.device) for k, v in encoded_input.items() if k in ['input_ids', 'attention_mask']}
         with torch.no_grad():
             model_output = self.model(**encoded_input)
 
