@@ -14,22 +14,19 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size for DataLoader')
     parser.add_argument('--gpus', type=int, nargs='+', default=[0], help='GPU Ids')
     parser.add_argument('--topk', type=int, default=10, help='Top k for faiss retrieval')
+    parser.add_argument('--model', type=str, default='Alibaba-NLP/gte-large-en-v1.5', help='Model name for embedding')
+    parser.add_argument('--embedding_dim', type=int, default=1024, help='Embedding dimension')
+    parser.add_argument('--use_fp16', action='store_true', help='Use fp16 for embedding model')
     args = parser.parse_args()
     batch_size = args.batch_size
 
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, 'data')
 
-    print("Start blocking for batch size: ", batch_size)
+    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}")
 
-
-    model_name = "Alibaba-NLP/gte-large-en-v1.5"
-    embedding_dim = 1024
-    # model_name = "sentence-transformers/all-MiniLM-L6-v2"
-    # embedding_dim = 384
-    embedding_model = SentenceTransformerEmbeddingModel(model_name, device_ids=args.gpus)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
+    tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
 
     amazon_dataset = AmazonDataset(os.path.join(data_path, "amazon_google/Amazon.csv"), tokenizer)
     google_dataset = GoogleDataset(os.path.join(data_path, "amazon_google/GoogleProducts.csv"), tokenizer)
@@ -37,7 +34,7 @@ if __name__ == "__main__":
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
     ground_truth = dict(zip(perfect_mapping_df['idAmazon'],perfect_mapping_df['idGoogleBase']))
 
-    faiss_index = get_index(embedding_dim)
+    faiss_index = get_index(args.embedding_dim)
 
     block(google_dataset,
           amazon_dataset,
