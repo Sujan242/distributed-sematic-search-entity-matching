@@ -18,6 +18,7 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
 
     all_embeddings = torch.cat(all_embeddings, dim=0)
     all_embeddings = all_embeddings.contiguous()
+    all_embeddings = all_embeddings.cpu().numpy()  # Move to CPU for FAISS
     faiss_index.train(all_embeddings)
     faiss_index.add(all_embeddings)
     return tableA_ids
@@ -34,9 +35,9 @@ def search_index(dataset: BaseDataset, batch_size: int,
 
     for batch in dataloader:
         ids = batch['id']
-        embeddings = embedding_model.get_embedding(batch).cpu() # TODO avoid CPU transfer here
-
-        distances, indices = faiss_index.search(embeddings, top_k)
+        embeddings = embedding_model.get_embedding(batch) # TODO avoid CPU transfer here
+        embeddings_np = embeddings.cpu().numpy()
+        distances, indices = faiss_index.search(embeddings_np, top_k)
 
         for i, id in enumerate(ids):
             tableA_matches = [tableA_ids[idx] for idx in indices[i]]

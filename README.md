@@ -61,7 +61,9 @@ python amazon-google.py \
     --topk 10 \
     --model Alibaba-NLP/gte-large-en-v1.5 \
     --embedding_dim 1024 \
-    --use_fp16
+    --use_fp16 \
+    --use_pca \
+    --pca_dim 384 
 ```
 
 ---
@@ -76,6 +78,8 @@ python amazon-google.py \
 | `--model` | Huggingface model name for embeddings | `'Alibaba-NLP/gte-large-en-v1.5'` | `'Alibaba-NLP/gte-large-en-v1.5'` |
 | `--embedding_dim` | Dimension of embeddings (depends on model) | `1024`                            | `1024` |
 | `--use_fp16` | (Flag) Use half-precision (fp16) inference | `False`                           | (just include the flag) |
+| `--use_pca` | (Flag) Use PCA for reducing the dimensions | `False`                           | (just include the flag) |
+| `--pca_dim` | PCA Dimension defined | `384`                              | `384` |
 
 > ⚠️ Note: For `--use_fp16`, you do not pass a value — just add `--use_fp16` to enable it.
 
