@@ -28,7 +28,7 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
 def search_index(dataset: BaseDataset, batch_size: int,
                  embedding_model: EmbeddingModel, faiss_index,
                  top_k: int = 5,
-                 tableA_ids: list = None):
+                 tableA_ids: list = None, type='amazon-google'):
     dataloader = DataLoader(dataset, batch_size=batch_size)
 
     matches = {}
@@ -52,20 +52,29 @@ def search_index(dataset: BaseDataset, batch_size: int,
             # print(f"DEBUG: shape(tableA_matches)={len(tableA_matches)}")
 
             for k in range(len(tableA_matches)):
-                matchData.append({
+                if type == 'amazon-google':
+                    matchData.append({
                     'id': id,
                     'matchNum': k,
                     'matchIdx': int(indices[i][k]),
                     'distance': float(distances[i][k]),
                     'matchId': tableA_matches[k]
-                })
-                print(f"DEBUG: record={matchData[-1]}")
+                    })
+                    print(f"DEBUG: record={matchData[-1]}")
+                elif type == 'songs':
+                    matchData.append({
+                        'id': id,
+                        'matchNum': k,
+                        'matchIdx': int(indices[i][k]),
+                        'distance': float(distances[i][k]),
+                        'matchId': tableA_matches[k]
+                    })
 
-        fieldnames = ['id', 'matchNum', 'matchIdx', 'distance', 'matchId']
+        # fieldnames = ['id', 'matchNum', 'matchIdx', 'distance', 'matchId']
+        #
+        # with open('match_details.csv', 'w', newline='') as csvfile:
+        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #     writer.writeheader()
+        #     writer.writerows(matchData)
 
-        with open('match_details.csv', 'w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(matchData)
-
-    return matches
+    return matches, matchData
