@@ -13,6 +13,8 @@ def get_index(dim, nlist=1000):
         # Move it to GPU
         gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
 
+        gpu_index.useFloat16 = True
+
         return gpu_index
     else:
         print("Using CPU for FAISS index")
