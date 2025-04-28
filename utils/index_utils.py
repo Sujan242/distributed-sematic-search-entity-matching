@@ -9,17 +9,25 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
 
     dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True, collate_fn=collator)
     tableA_ids = []
-    all_embeddings = []
+    # all_embeddings = []
+    initial_embeddings = []
     for batch in dataloader:
         ids = batch['id']
         embeddings = embedding_model.get_embedding(batch)
-        all_embeddings.append(embeddings)
+        if faiss_index.is_trained:
+            faiss_index.add(embeddings)
+        else:
+            if len(initial_embeddings) <= (39000/batch_size):
+                initial_embeddings.append(embeddings)
+            else:
+                initial_embeddings = torch.cat(initial_embeddings, dim=0)
+                faiss_index.train(initial_embeddings)
+                print("trained faiss index")
+        # all_embeddings.append(embeddings)
         tableA_ids.extend(ids)
-
-    all_embeddings = torch.cat(all_embeddings, dim=0)
-    all_embeddings = all_embeddings.contiguous()
-    faiss_index.train(all_embeddings)
-    faiss_index.add(all_embeddings)
+    #
+    # all_embeddings = torch.cat(all_embeddings, dim=0)
+    # all_embeddings = all_embeddings.contiguous()
     return tableA_ids
 
 
