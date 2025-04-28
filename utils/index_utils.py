@@ -69,6 +69,7 @@ def search_index(dataset: BaseDataset, batch_size: int,
                         'distance': float(distances[i][k]),
                         'matchId': tableA_matches[k]
                     })
+                    print(f"DEBUG: record={matchData[-1]}")
 
         # fieldnames = ['id', 'matchNum', 'matchIdx', 'distance', 'matchId']
         #

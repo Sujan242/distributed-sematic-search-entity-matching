@@ -85,7 +85,9 @@ if __name__ == "__main__":
         download_csv(url="http://pages.cs.wisc.edu/~anhai/data/falcon_data/songs/matches_msd_msd.csv", local_filepath='./data/songs/Songs_perfectMapping.csv')
 
     songs1_dataset = SongsDataset(os.path.join(data_path, 'songs.csv'))
+    print(f"Created dataset #1 of {len(songs1_dataset)} songs")
     songs2_dataset = SongsDataset(os.path.join(data_path, 'songs.csv'))
+    print(f"Created dataset #2 of {len(songs2_dataset)} songs")
     perfect_mapping_path = os.path.join(data_path, "Songs_perfectMapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
     perfect_mapping_df.rename(columns={
