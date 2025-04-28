@@ -54,3 +54,31 @@ class GoogleDataset(BaseDataset):
             'id': id,
             'input_ids': input_ids
         }
+
+class SongsDataset(BaseDataset):
+    def __getitem__(self, idx):
+        id = self.df.iloc[idx]['id']
+        title = self.df.iloc[idx]['title']
+        release = self.df.iloc[idx]['release']
+        artist_name = self.df.iloc[idx]['artist_name']
+        duration = self.df.iloc[idx]['duration']
+        artist_familiarity = self.df.iloc[idx]['artist_familiarity']
+        artist_hotness = self.df.iloc[idx]['artist_hotttnesss']
+        year = self.df.iloc[idx]['year']
+
+        string_representation = ""
+        if not pd.isna(title):
+            string_representation += f"The song title is {title}. "
+        if not pd.isna(release):
+            string_representation += f"The release is {release}. "
+        if not pd.isna(artist_name):
+            string_representation += f"The artist is {artist_name}. "
+        if duration > 0:
+            string_representation += f"The duration is {duration}. "
+
+        input_ids = self.tokenizer.encode(string_representation, return_tensors='pt', truncation=True).squeeze()
+
+        return {
+            'id': id,
+            'input_ids': input_ids
+        }
