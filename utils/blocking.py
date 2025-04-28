@@ -61,23 +61,23 @@ def get_match_details(tableA_dataset, tableB_dataset, match_data, type):
         augmented_df.to_csv("./out-data/match_details_top10.csv", index=False)
     elif type == "songs":
         songs1_dataset_df = tableA_dataset.df
-        songs1_df = songs1_dataset_df[['id', 'title', 'release', 'artistName', 'duration', 'year']].copy()
+        songs1_df = songs1_dataset_df[['id', 'title', 'release', 'artist_name', 'duration', 'year']].copy()
         songs1_df.rename(columns={
             'id': 'idSong1',
             'title': 'titleSong1',
             'release': 'releaseSong1',
-            'artistName': 'artistSong1',
+            'artist_name': 'artistSong1',
             'duration': 'durationSong1',
             'year': 'yearSong1'
         }, inplace=True)
 
         songs2_dataset_df = tableB_dataset.df
-        songs2_df = songs2_dataset_df[['id', 'title', 'release', 'artistName', 'duration', 'year']].copy()
+        songs2_df = songs2_dataset_df[['id', 'title', 'release', 'artist_name', 'duration', 'year']].copy()
         songs2_df.rename(columns={
             'id': 'idSong2',
             'title': 'titleSong2',
             'release': 'releaseSong2',
-            'artistName': 'artistSong2',
+            'artist_name': 'artistSong2',
             'duration': 'durationSong2',
             'year': 'yearSong2'
         }, inplace=True)

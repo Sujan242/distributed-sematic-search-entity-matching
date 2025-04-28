@@ -74,8 +74,6 @@ class SongsDataset(BaseDataset):
             string_representation += f"The release is {release}. "
         if not pd.isna(artist_name):
             string_representation += f"The artist is {artist_name}. "
-        if year > 0:
-            string_representation += f"The year is {year}. "
         if duration > 0:
             string_representation += f"The duration is {duration}. "
 
