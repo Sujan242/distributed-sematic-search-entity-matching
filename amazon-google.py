@@ -19,13 +19,16 @@ if __name__ == "__main__":
     parser.add_argument('--use_fp16', action='store_true', help='Use fp16 for embedding model')
     parser.add_argument('--use_pca', action='store_true', help='Use PCA for dimensionality reduction')
     parser.add_argument('--pca_dim', type=int, default=256, help='PCA dimension')
+    parser.add_argument('--index_type', type=str, default='flat', help='Index type for FAISS (flat or ivf)')
+    parser.add_argument('--nlist', type=int, default=100, help='Number of lists for IVF index')
+    parser.add_argument('--nprobe', type=int, default=1, help='Number of probes for IVF index')
     args = parser.parse_args()
     batch_size = args.batch_size
 
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, 'data')
 
-    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}, use_pca: {args.use_pca}")
+    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}, use_pca: {args.use_pca}, pca_dim: {args.pca_dim}, index_type: {args.index_type}, nlist: {args.nlist}, nprobe: {args.nprobe}")
 
     embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
     tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
@@ -35,11 +38,8 @@ if __name__ == "__main__":
     perfect_mapping_path = os.path.join(data_path, "amazon_google/Amzon_GoogleProducts_perfectMapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
     ground_truth = dict(zip(perfect_mapping_df['idAmazon'],perfect_mapping_df['idGoogleBase']))
-    if args.use_pca:
-        print(f"Using PCA with dimension {args.pca_dim}")
-        faiss_index = get_index(args.embedding_dim, use_pca=args.use_pca, dim_out=args.pca_dim)
-    else:
-        faiss_index = get_index(args.embedding_dim)
+    dim_out = args.pca_dim if args.use_pca else None
+    faiss_index = get_index(args.embedding_dim, index_type= args.index_type, use_pca=args.use_pca, dim_out = dim_out, nlist=args.nlist)
 
     block(google_dataset,
           amazon_dataset,
@@ -50,6 +50,6 @@ if __name__ == "__main__":
           tokenizer,
           args.topk,
           args.gpus,
-          args.use_pca,
-          args.pca_dim
+          args.index_type,
+          args.nprobe
           )
