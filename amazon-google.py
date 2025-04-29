@@ -113,7 +113,7 @@ if __name__ == "__main__":
             f.writelines(lines)
 
     if missingGoldenFile:
-        download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/matches_walmart_amazon.csv", local_filepath='./data/walmart_amazon/WA_perfectMapping.csv')
+        download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/matches_walmart_amazon.csv", local_filepath='./data/walmart_amazon/walmart_amazon_perfectmapping.csv')
 
     walmartColumns = ["id","title","category","brand","modelno","price"]
     walmart_dataset = WalmartDataset(os.path.join(data_path, "walmart.csv"), tokenizer, columns=walmartColumns)
