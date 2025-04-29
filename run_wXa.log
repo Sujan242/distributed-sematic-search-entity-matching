@@ -1,0 +1,18 @@
+Loading data ...
+File already downloaded: ./data/walmart_amazon/walmart.csv
+File already downloaded: ./data/walmart_amazon/amazon.csv
+File already downloaded: ./data/walmart_amazon/walmart_amazon_perfectmapping.csv
+Start blocking for batch size:1, gpus: [0, 1, 2, 3], topk: 10, model: Alibaba-NLP/gte-large-en-v1.5, embedding_dim: 1024, use_fp16: False
+Using GPU for embedding: NVIDIA GeForce RTX 2080 Ti
+Using GPU for FAISS index
+Loaded Dataset 1 with 2554 records
+Loaded Dataset 2 with 22074 records
+Start building index...
+Build Index time:  69.74245309829712
+Start searching...
+Index search time:  609.892213344574
+Total Blocking time:  679.6348407268524
+Precision: 0.0997
+Recall: 0.9974
+F1 Score: 0.1813
+Candidate size = 22074*10 = 220740

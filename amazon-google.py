@@ -133,12 +133,12 @@ if __name__ == "__main__":
     # When evaluating dataset1=walmart, dataset2=amazon have ground_truth as id2:id1
     perfect_mapping_path = os.path.join(data_path, "walmart_amazon_perfectmapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
-    ground_truth = dict(zip(perfect_mapping_df['id2'],perfect_mapping_df['id1']))
+    ground_truth = dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
 
     faiss_index = get_index(args.embedding_dim)
 
-    block(walmart_dataset,
-          amazon_dataset,
+    block(amazon_dataset,
+          walmart_dataset,
           embedding_model,
           faiss_index,
           batch_size,
