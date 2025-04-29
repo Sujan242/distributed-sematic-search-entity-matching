@@ -21,6 +21,9 @@ class CollatorWithID:
 def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k, gpus):
     blocking_start = time.time()
     collator = CollatorWithID(tokenizer=tokenizer)
+    print(f"Loaded Dataset 1 with {len(first_dataset)} records")
+    print(f"Loaded Dataset 2 with {len(second_dataset)} records")
+
     print("Start building index...")
     build_start_time = time.time()
     tableA_ids = build_index(first_dataset, batch_size, embedding_model, faiss_index, collator)

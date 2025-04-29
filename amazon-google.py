@@ -73,11 +73,7 @@ if __name__ == "__main__":
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, 'data/walmart_amazon')
 
-    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
-
-    embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
-    tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
-
+    print("Loading data ...")
     missingDataDir = not os.path.isdir(data_path)
     missingWalmartFile = not os.path.isfile(os.path.join(data_path, 'walmart.csv'))
     missingAmazonFile = not os.path.isfile(os.path.join(data_path, 'amazon.csv'))
@@ -101,11 +97,11 @@ if __name__ == "__main__":
 
     if missingAmazonFile:
         res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/amazon.csv", local_filepath='./data/walmart_amazon/amazon.csv')
-        with open(os.path.join(data_path, 'amazon.csv'), 'r') as f:
-            lines = f.readlines()
+    
+    with open(os.path.join(data_path, 'amazon.csv'), 'r') as f:
+        lines = f.readlines()
 
     expectedSchema = 'id,url,asin,brand,modelno,category,pcategory1,category2,pcategory2,title,listprice,price,prodfeatures,techdetails,proddescrshort,proddescrlong,dimensions,imageurl,itemweight,shipweight,orig_prodfeatures,orig_techdetails\n'
-
     if lines[0] != expectedSchema:
         lines[0] = expectedSchema
 
@@ -114,6 +110,11 @@ if __name__ == "__main__":
 
     if missingGoldenFile:
         download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/matches_walmart_amazon.csv", local_filepath='./data/walmart_amazon/walmart_amazon_perfectmapping.csv')
+
+    print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
+
+    embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
+    tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
 
     walmartColumns = ["id","title","category","brand","modelno","price"]
     walmart_dataset = WalmartDataset(os.path.join(data_path, "walmart.csv"), tokenizer, columns=walmartColumns)
