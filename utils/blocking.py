@@ -37,6 +37,7 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
         faiss_cpu_index = faiss.index_gpu_to_cpu(faiss_index)
         faiss_index = faiss.index_cpu_to_gpus_list(faiss_cpu_index, gpus=gpus, co=cloner_options)
 
+    print("Build Index time: ", build_end_time - build_start_time)
     print("Start searching...")
     # search index for table-B
     matches = search_index(dataset=second_dataset,
@@ -49,9 +50,8 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
                            )
     index_search_end_time = time.time()
     blocking_end = time.time()
-    print("Build Index time: ", build_end_time - build_start_time)
     print("Index search time: ", index_search_end_time - index_search_start_time)
-    print("Blocking time: ", blocking_end - blocking_start)
+    print("Total Blocking time: ", blocking_end - blocking_start)
     # evaluate the results
     evaluate(matches, ground_truth)
-    print("Candidate size = ", len(second_dataset)*top_k)
+    print(f"Candidate size = {len(second_dataset)}*{top_k} = {len(second_dataset) * top_k}")

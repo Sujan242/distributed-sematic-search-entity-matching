@@ -81,9 +81,12 @@ if __name__ == "__main__":
 
     if missingDataDir:
         os.makedirs(data_path, exist_ok=True)
+        print(f"Created missing data directory {data_path}")
 
     if missingWalmartFile:
         res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/walmart.csv", local_filepath='./data/walmart_amazon/walmart.csv')
+    else:
+        print(f"File already downloaded: {os.path.join(data_path, 'walmart.csv').replace(os.getcwd(), '.')}")
         
     with open(os.path.join(data_path, 'walmart.csv'), 'r') as f:
         lines = f.readlines()
@@ -97,6 +100,8 @@ if __name__ == "__main__":
 
     if missingAmazonFile:
         res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/amazon.csv", local_filepath='./data/walmart_amazon/amazon.csv')
+    else:
+        print(f"File already downloaded: {os.path.join(data_path, 'amazon.csv').replace(os.getcwd(), '.')}")
     
     with open(os.path.join(data_path, 'amazon.csv'), 'r') as f:
         lines = f.readlines()
@@ -110,6 +115,8 @@ if __name__ == "__main__":
 
     if missingGoldenFile:
         download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/matches_walmart_amazon.csv", local_filepath='./data/walmart_amazon/walmart_amazon_perfectmapping.csv')
+    else:
+        print(f"File already downloaded: {os.path.join(data_path, 'walmart_amazon_perfectmapping.csv').replace(os.getcwd(), '.')}")
 
     print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
 
@@ -122,14 +129,16 @@ if __name__ == "__main__":
     amazonColumns = ["id","title","category","brand","modelno","price"]
     amazon_dataset = NewAmazonDataset(os.path.join(data_path, "amazon.csv"), tokenizer, columns=amazonColumns)
 
+    # When evaluating dataset1=amazon, dataset2=walmart have ground_truth as id1:id2
+    # When evaluating dataset1=walmart, dataset2=amazon have ground_truth as id2:id1
     perfect_mapping_path = os.path.join(data_path, "walmart_amazon_perfectmapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
-    ground_truth = dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
+    ground_truth = dict(zip(perfect_mapping_df['id2'],perfect_mapping_df['id1']))
 
     faiss_index = get_index(args.embedding_dim)
 
-    block(amazon_dataset,
-          walmart_dataset,
+    block(walmart_dataset,
+          amazon_dataset,
           embedding_model,
           faiss_index,
           batch_size,
