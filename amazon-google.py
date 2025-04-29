@@ -81,32 +81,36 @@ if __name__ == "__main__":
     missingDataDir = not os.path.isdir(data_path)
     missingWalmartFile = not os.path.isfile(os.path.join(data_path, 'walmart.csv'))
     missingAmazonFile = not os.path.isfile(os.path.join(data_path, 'amazon.csv'))
-    missingGoldenFile = not os.path.isfile(os.path.join(data_path, 'matches_walmart_amazon.csv'))
+    missingGoldenFile = not os.path.isfile(os.path.join(data_path, 'walmart_amazon_perfectmapping.csv'))
 
     if missingDataDir:
         os.makedirs(data_path, exist_ok=True)
 
     if missingWalmartFile:
         res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/walmart.csv", local_filepath='./data/walmart_amazon/walmart.csv')
-        if res is not None:
-            with open(res, 'r') as f:
-                lines = f.readlines()
+        
+    with open(os.path.join(data_path, 'walmart.csv'), 'r') as f:
+        lines = f.readlines()
 
-            lines[0] = 'id,product_id,upc,brand,category,title,price,shelfdescr,shortdescr,longdescr,imageurl,orig_shelfdescr,orig_shortdescr,orig_longdescr,modelno,shipweight,dimensions\n'
+    expectedSchema = 'id,product_id,upc,brand,category,title,price,shelfdescr,shortdescr,longdescr,imageurl,orig_shelfdescr,orig_shortdescr,orig_longdescr,modelno,shipweight,dimensions\n'
+    if lines[0] != expectedSchema:
+        lines[0] = expectedSchema
 
-            with open(res, 'w') as f:
-                f.writelines(lines)
+        with open(os.path.join(data_path, 'walmart.csv'), 'w') as f:
+            f.writelines(lines)
 
     if missingAmazonFile:
         res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/amazon.csv", local_filepath='./data/walmart_amazon/amazon.csv')
-        if res is not None:
-            with open(res, 'r') as f:
-                lines = f.readlines()
+        with open(os.path.join(data_path, 'amazon.csv'), 'r') as f:
+            lines = f.readlines()
 
-            lines[0] = 'id,url,asin,brand,modelno,category,pcategory1,category2,pcategory2,title,listprice,price,prodfeatures,techdetails,proddescrshort,proddescrlong,dimensions,imageurl,itemweight,shipweight,orig_prodfeatures,orig_techdetails\n'
+    expectedSchema = 'id,url,asin,brand,modelno,category,pcategory1,category2,pcategory2,title,listprice,price,prodfeatures,techdetails,proddescrshort,proddescrlong,dimensions,imageurl,itemweight,shipweight,orig_prodfeatures,orig_techdetails\n'
 
-            with open(res, 'w') as f:
-                f.writelines(lines)
+    if lines[0] != expectedSchema:
+        lines[0] = expectedSchema
+
+        with open(os.path.join(data_path, 'amazon.csv'), 'w') as f:
+            f.writelines(lines)
 
     if missingGoldenFile:
         download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/matches_walmart_amazon.csv", local_filepath='./data/walmart_amazon/WA_perfectMapping.csv')
@@ -117,7 +121,7 @@ if __name__ == "__main__":
     amazonColumns = ["id","title","category","brand","modelno","price"]
     amazon_dataset = NewAmazonDataset(os.path.join(data_path, "amazon.csv"), tokenizer, columns=amazonColumns)
 
-    perfect_mapping_path = os.path.join(data_path, "matches_walmart_amazon.csv")
+    perfect_mapping_path = os.path.join(data_path, "walmart_amazon_perfectmapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
     ground_truth = dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
 

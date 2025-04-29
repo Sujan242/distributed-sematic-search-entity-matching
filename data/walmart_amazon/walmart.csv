@@ -1,4 +1,4 @@
-_id,title,category,brand,modelno,price
+id,product_id,upc,brand,category,title,price,shelfdescr,shortdescr,longdescr,imageurl,orig_shelfdescr,orig_shortdescr,orig_longdescr,modelno,shipweight,dimensions
 0,com.intellij.database.extractors.TextInfo@8c1c744f,com.intellij.database.extractors.TextInfo@816d2d85,com.intellij.database.extractors.TextInfo@4a271ae3,com.intellij.database.extractors.TextInfo@ae93cd8f,58.45
 1,com.intellij.database.extractors.TextInfo@99c4d08d,com.intellij.database.extractors.TextInfo@84dc3e41,com.intellij.database.extractors.TextInfo@41c1b1bb,com.intellij.database.extractors.TextInfo@d07073c9,438.84
 2,com.intellij.database.extractors.TextInfo@4d5f2f6d,com.intellij.database.extractors.TextInfo@1b0887b3,com.intellij.database.extractors.TextInfo@88789615,com.intellij.database.extractors.TextInfo@4cbb121d,59.25
