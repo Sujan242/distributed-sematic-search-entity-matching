@@ -4,10 +4,60 @@ import pandas as pd
 from transformers import AutoTokenizer
 
 from utils.blocking import block
-from utils.dataset import AmazonDataset, GoogleDataset
+from utils.dataset import AmazonDataset, GoogleDataset, NewAmazonDataset, WalmartDataset
 from utils.embedding_model import SentenceTransformerEmbeddingModel
 from utils.index import get_index
 
+import requests
+
+def download_csv(url, local_filepath):
+    """
+    Downloads the CSV file from the Wisconsin CS website and saves it in the current directory.
+
+    Returns:
+        str: Path to the downloaded file if successful, None otherwise
+    """
+    try:
+        # Send GET request to download the file
+        print(f"Downloading from {url}...")
+        response = requests.get(url, stream=True)
+
+        # Check if the request was successful
+        response.raise_for_status()
+
+        # Get total file size for progress reporting
+        total_size = int(response.headers.get('content-length', 0))
+
+        # Write the file to disk
+        with open(local_filepath, 'wb') as file:
+            if total_size == 0:  # No content length header
+                file.write(response.content)
+                print(f"Downloaded file (unknown size)")
+            else:
+                downloaded = 0
+                chunk_size = 8192  # 8KB chunks
+                for chunk in response.iter_content(chunk_size=chunk_size):
+                    if chunk:  # Filter out keep-alive chunks
+                        file.write(chunk)
+                        downloaded += len(chunk)
+
+                        # Print progress
+                        progress = (downloaded / total_size) * 100
+                        print(f"\rDownload progress: {progress:.1f}% ({downloaded / 1024 / 1024:.1f} MB)", end="")
+
+                print("\nDownload complete!")
+
+        # Verify the file exists and has content
+        if os.path.exists(local_filepath) and os.path.getsize(local_filepath) > 0:
+            print(f"File saved as '{local_filepath}'")
+            return local_filepath
+        else:
+            print("Error: Downloaded file is empty or not found")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading file: {e}")
+        return None
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -21,23 +71,60 @@ if __name__ == "__main__":
     batch_size = args.batch_size
 
     cwd = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(cwd, 'data')
+    data_path = os.path.join(cwd, 'data/walmart_amazon')
 
     print(f"Start blocking for batch size:{batch_size}, gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
 
     embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
     tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
 
-    amazon_dataset = AmazonDataset(os.path.join(data_path, "amazon_google/Amazon.csv"), tokenizer)
-    google_dataset = GoogleDataset(os.path.join(data_path, "amazon_google/GoogleProducts.csv"), tokenizer)
-    perfect_mapping_path = os.path.join(data_path, "amazon_google/Amzon_GoogleProducts_perfectMapping.csv")
+    missingDataDir = not os.path.isdir(data_path)
+    missingWalmartFile = not os.path.isfile(os.path.join(data_path, 'walmart.csv'))
+    missingAmazonFile = not os.path.isfile(os.path.join(data_path, 'amazon.csv'))
+    missingGoldenFile = not os.path.isfile(os.path.join(data_path, 'matches_walmart_amazon.csv'))
+
+    if missingDataDir:
+        os.makedirs(data_path, exist_ok=True)
+
+    if missingWalmartFile:
+        res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/walmart.csv", local_filepath='./data/walmart_amazon/walmart.csv')
+        if res is not None:
+            with open(res, 'r') as f:
+                lines = f.readlines()
+
+            lines[0] = 'id,product_id,upc,brand,category,title,price,shelfdescr,shortdescr,longdescr,imageurl,orig_shelfdescr,orig_shortdescr,orig_longdescr,modelno,shipweight,dimensions\n'
+
+            with open(res, 'w') as f:
+                f.writelines(lines)
+
+    if missingAmazonFile:
+        res = download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/amazon.csv", local_filepath='./data/walmart_amazon/amazon.csv')
+        if res is not None:
+            with open(res, 'r') as f:
+                lines = f.readlines()
+
+            lines[0] = 'id,url,asin,brand,modelno,category,pcategory1,category2,pcategory2,title,listprice,price,prodfeatures,techdetails,proddescrshort,proddescrlong,dimensions,imageurl,itemweight,shipweight,orig_prodfeatures,orig_techdetails\n'
+
+            with open(res, 'w') as f:
+                f.writelines(lines)
+
+    if missingGoldenFile:
+        download_csv(url="http://pages.cs.wisc.edu/~anhai/data/corleone_data/products/matches_walmart_amazon.csv", local_filepath='./data/walmart_amazon/WA_perfectMapping.csv')
+
+    walmartColumns = ["id","title","category","brand","modelno","price"]
+    walmart_dataset = WalmartDataset(os.path.join(data_path, "walmart.csv"), tokenizer, columns=walmartColumns)
+
+    amazonColumns = ["id","title","category","brand","modelno","price"]
+    amazon_dataset = NewAmazonDataset(os.path.join(data_path, "amazon.csv"), tokenizer, columns=amazonColumns)
+
+    perfect_mapping_path = os.path.join(data_path, "matches_walmart_amazon.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
-    ground_truth = dict(zip(perfect_mapping_df['idAmazon'],perfect_mapping_df['idGoogleBase']))
+    ground_truth = dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
 
     faiss_index = get_index(args.embedding_dim)
 
-    block(google_dataset,
-          amazon_dataset,
+    block(amazon_dataset,
+          walmart_dataset,
           embedding_model,
           faiss_index,
           batch_size,
