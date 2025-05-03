@@ -18,7 +18,7 @@ class CollatorWithID:
         batch['id'] = ids                      # reattach ids
         return batch
 
-def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k, gpus):
+def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, search_batch_size, ground_truth, tokenizer, top_k, gpus):
     blocking_start = time.time()
     collator = CollatorWithID(tokenizer=tokenizer)
     print("Start building index...")
@@ -37,7 +37,7 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     print("Start searching...")
     # search index for table-B
     matches = search_index(dataset=second_dataset,
-                           batch_size=batch_size,
+                           batch_size=search_batch_size,
                            embedding_model=embedding_model,
                            faiss_index=faiss_index,
                            top_k=top_k,
