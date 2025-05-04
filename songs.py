@@ -1,6 +1,7 @@
 import argparse
 import os
 import pandas as pd
+from collections import defaultdict
 from torch.nn.functional import embedding
 
 from utils.blocking import block
@@ -64,7 +65,6 @@ def download_csv(url, local_filepath):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size for DataLoader')
-    parser.add_argument('--search_batch_size', type=int, default=1, help='Batch size for search')
     parser.add_argument('--gpus', type=int, nargs='+', default=[0], help='GPU Ids')
     parser.add_argument('--topk', type=int, default=10, help='Top k for faiss retrieval')
     parser.add_argument('--model', type=str, default='Alibaba-NLP/gte-large-en-v1.5', help='Model name for embedding')
@@ -72,7 +72,6 @@ if __name__ == "__main__":
     parser.add_argument('--use_fp16', action='store_true', help='Use fp16 for embedding model')
     args = parser.parse_args()
     batch_size = args.batch_size
-    search_batch_size = args.search_batch_size
 
     print("Start blocking for batch size: ", batch_size)
 
@@ -92,7 +91,7 @@ if __name__ == "__main__":
         download_csv(url="http://pages.cs.wisc.edu/~anhai/data/falcon_data/songs/matches_msd_msd.csv", local_filepath='./data/songs/Songs_perfectMapping.csv')
 
     print(
-        f"Start blocking for batch size:{batch_size}, search batch size:{search_batch_size},  gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
+        f"Start blocking for batch size:{batch_size},  gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
 
     # build index for table-A
     embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
@@ -108,7 +107,10 @@ if __name__ == "__main__":
         'id1': 'idSong1',
         'id2': 'idSong2',
     }, inplace=True)
-    ground_truth = dict(zip(perfect_mapping_df['idSong1'],perfect_mapping_df['idSong2']))
+    ground_truth = defaultdict(list)
+    for a, b in zip(perfect_mapping_df['idSong1'],
+                perfect_mapping_df['idSong2']):
+        ground_truth[a].append(b)
     faiss_index = get_index(args.embedding_dim)
 
 
@@ -117,7 +119,6 @@ if __name__ == "__main__":
           embedding_model,
           faiss_index,
           batch_size,
-          search_batch_size,
           ground_truth,
           tokenizer,
           args.topk,

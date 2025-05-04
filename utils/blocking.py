@@ -3,7 +3,7 @@ import time
 import faiss
 
 from utils.index_utils import build_index, search_index
-from utils.evaluate_utils import evaluate
+from utils.evaluate_utils import evaluate_multiple_matches
 
 from transformers import DataCollatorWithPadding
 import torch
@@ -18,7 +18,7 @@ class CollatorWithID:
         batch['id'] = ids                      # reattach ids
         return batch
 
-def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, search_batch_size, ground_truth, tokenizer, top_k, gpus):
+def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k, gpus):
     blocking_start = time.time()
     collator = CollatorWithID(tokenizer=tokenizer)
     print("Start building index...")
@@ -37,7 +37,7 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     print("Start searching...")
     # search index for table-B
     matches = search_index(dataset=second_dataset,
-                           batch_size=search_batch_size,
+                           batch_size=batch_size,
                            embedding_model=embedding_model,
                            faiss_index=faiss_index,
                            top_k=top_k,
@@ -50,5 +50,5 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     print("Index search time: ", index_search_end_time - index_search_start_time)
     print("Blocking time: ", blocking_end - blocking_start)
     # evaluate the results
-    evaluate(matches, ground_truth)
+    evaluate_multiple_matches(matches, ground_truth)
     print("Candidate size = ", len(second_dataset)*top_k)

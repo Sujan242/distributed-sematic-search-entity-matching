@@ -17,7 +17,7 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
         if faiss_index.is_trained:
             faiss_index.add(embeddings)
         else:
-            if len(initial_embeddings) <= (39000/batch_size):
+            if len(initial_embeddings) <= (80000/batch_size):
                 initial_embeddings.append(embeddings)
             else:
                 initial_embeddings = torch.cat(initial_embeddings, dim=0)
