@@ -42,6 +42,7 @@ def evaluate_multiple_matches(matches, ground_truth):
       dict with keys 'precision', 'recall', 'f1' giving the
       macro-averaged scores over all qids in ground_truth.
     """
+    print("Evaluating matches...")
     precisions = []
     recalls = []
     f1s = []
@@ -50,6 +51,7 @@ def evaluate_multiple_matches(matches, ground_truth):
         pred_list = matches.get(qid, [])
         true_set = set(true_list)
         pred_set = set(pred_list)
+        print(f"qid: {qid}, true_list: {true_list}, pred_list: {pred_list}")
 
         # true positives
         tp = len(true_set & pred_set)

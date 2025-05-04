@@ -108,9 +108,10 @@ if __name__ == "__main__":
         'id2': 'idSong2',
     }, inplace=True)
     ground_truth = defaultdict(list)
+    ground_truth = defaultdict(list)
     for a, b in zip(perfect_mapping_df['idSong1'],
-                perfect_mapping_df['idSong2']):
-        ground_truth[a].append(b)
+        perfect_mapping_df['idSong2']):
+        ground_truth[b].append(a)
     faiss_index = get_index(args.embedding_dim)
 
 
