@@ -5,7 +5,7 @@ from utils.embedding_model import EmbeddingModel
 import torch
 import faiss.contrib.torch_utils # need this for GPU support even though you don't use it
 
-def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index, collator):
+def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index, collator, nprobe = 100):
 
     dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True, collate_fn=collator)
     tableA_ids = []
@@ -32,6 +32,7 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
 
     faiss_index.add(all_embeddings)
     print(f"Added {all_embeddings.shape[0]} vectors to index")
+    faiss_index.nprobe = 50
     # for batch in dataloader:
     #     ids = batch['id']
     #     embeddings = embedding_model.get_embedding(batch)
