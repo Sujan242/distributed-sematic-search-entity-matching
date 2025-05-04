@@ -49,8 +49,6 @@ def evaluate_multiple_matches(matches, ground_truth):
     f1s = []
     ids = np.arange(1, 1025)
     for qid, true_list in ground_truth.items():
-        if qid not in ids:
-            continue
         pred_list = matches.get(qid, [])
         true_set = set(true_list)
         pred_set = set(pred_list)

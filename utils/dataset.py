@@ -69,28 +69,28 @@ class SongsDataset(BaseDataset):
         string_representation = ""
         if not pd.isna(title):
             string_representation += f"The song title is {title}. "
-        else:
-            string_representation += f"The song title is unknown. "
+        # else:
+        #     string_representation += f"The song title is unknown. "
         if not pd.isna(release):
             string_representation += f"The release is {release}. "
-        else:
-            string_representation += f"The release is unknown. "
+        # else:
+        #     string_representation += f"The release is unknown. "
         if not pd.isna(artist_name):
             string_representation += f"The artist is {artist_name}. "
-        else:
-            string_representation += f"The artist is unknown. "
+        # else:
+        #     string_representation += f"The artist is unknown. "
         if duration > 0:
             string_representation += f"The duration is {duration}. "
         else:
             string_representation += f"The duration is unknown. "
-        if artist_familiarity > 0:
-            string_representation += f"The artist familiarity is {artist_familiarity}. "
-        else:
-            string_representation += f"The artist familiarity is unknown. "
-        if artist_hotness > 0:
-            string_representation += f"The artist hotness is {artist_hotness}. "
-        else:
-            string_representation += f"The artist hotness is unknown. "
+        # if artist_familiarity > 0:
+        #     string_representation += f"The artist familiarity is {artist_familiarity}. "
+        # else:
+        #     string_representation += f"The artist familiarity is unknown. "
+        # if artist_hotness > 0:
+        #     string_representation += f"The artist hotness is {artist_hotness}. "
+        # else:
+        #     string_representation += f"The artist hotness is unknown. "
 
         input_ids = self.tokenizer.encode(string_representation, return_tensors='pt', truncation=True).squeeze()
 

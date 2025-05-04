@@ -73,6 +73,5 @@ def search_index(dataset: BaseDataset, batch_size: int,
             tableA_matches = [tableA_ids[idx] for idx in indices[i]]
             matches[id] = tableA_matches
             print(f"ID: {id}, Matches: {tableA_matches}")
-        break
 
     return matches
