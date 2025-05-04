@@ -136,10 +136,11 @@ if __name__ == "__main__":
     ground_truth = {} # dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
     srcLabel, tgtLabel = 'id1', 'id2'
     for rNum, row in perfect_mapping_df.iterrows():
-        if row[srcLabel] in ground_truth.keys():
-            ground_truth[row[srcLabel]].append(row[tgtLabel])
-        else:
-            ground_truth[row[srcLabel]] = [row[tgtLabel]]
+        ground_truth.append({row[srcLabel]: row[tgtLabel]})
+        # if row[srcLabel] in ground_truth.keys():
+        #     ground_truth[row[srcLabel]].append(row[tgtLabel])
+        # else:
+        #     ground_truth[row[srcLabel]] = [row[tgtLabel]]
 
     faiss_index = get_index(args.embedding_dim)
 
