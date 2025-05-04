@@ -28,6 +28,7 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
     #
     # all_embeddings = torch.cat(all_embeddings, dim=0)
     # all_embeddings = all_embeddings.contiguous()
+    print("Done building index")
     return tableA_ids
 
 

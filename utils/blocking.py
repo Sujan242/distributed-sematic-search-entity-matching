@@ -28,6 +28,7 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     index_search_start_time = time.time()
 
     # if multiple GPUs are available, replicate index across GPUs
+    print("Replicating index across GPUs...")
     if torch.cuda.is_available() and len(gpus) > 1:
         cloner_options = faiss.GpuMultipleClonerOptions()
         cloner_options.shard = False
