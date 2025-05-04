@@ -133,7 +133,14 @@ if __name__ == "__main__":
     # When evaluating dataset1=walmart, dataset2=amazon have ground_truth as id2:id1
     perfect_mapping_path = os.path.join(data_path, "walmart_amazon_perfectmapping.csv")
     perfect_mapping_df = pd.read_csv(perfect_mapping_path)
-    ground_truth = dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
+    ground_truth = {} # dict(zip(perfect_mapping_df['id1'],perfect_mapping_df['id2']))
+    for rNum, row in perfect_mapping_df.iterrows():
+        srcLabel = 'id1'
+        tgtLabel = 'id2'
+        if row[srcLabel] in ground_truth.keys():
+            row[srcLabel].append(row[tgtLabel])
+        else:
+            ground_truth[row[srcLabel]] = [row[tgtLabel]]
 
     faiss_index = get_index(args.embedding_dim)
 

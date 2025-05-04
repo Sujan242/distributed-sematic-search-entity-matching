@@ -6,15 +6,16 @@ def evaluate(matches, ground_truth):
     total_true = len(ground_truth)
 
     for google_id, predicted_amazon_ids in matches.items():
-        true_amazon_id = ground_truth.get(google_id)
-        if true_amazon_id is None:
+        true_amazon_ids = ground_truth.get(google_id)
+        if true_amazon_ids is None:
             # No ground truth for this Google ID, skip
             continue
 
         total_predicted += len(predicted_amazon_ids)
 
-        if true_amazon_id in predicted_amazon_ids:
-            total_correct += 1  # We found the true match!
+        for predicted_amazon_id in predicted_amazon_ids:
+            if predicted_amazon_id in true_amazon_ids:
+                total_correct += 1  # We found the true match!
 
     # Precision = How many of our predictions were correct
     precision = total_correct / total_predicted if total_predicted > 0 else 0.0
