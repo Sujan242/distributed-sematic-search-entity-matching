@@ -14,7 +14,7 @@ def evaluate(matches, ground_truth):
         total_predicted += len(predicted_amazon_ids)
 
         for predicted_amazon_id in predicted_amazon_ids:
-            if predicted_amazon_id in true_amazon_ids:
+            if predicted_amazon_id == true_amazon_ids:
                 total_correct += 1  # We found the true match!
 
     # Precision = How many of our predictions were correct
