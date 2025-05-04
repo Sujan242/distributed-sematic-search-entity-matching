@@ -23,7 +23,8 @@ class SentenceTransformerEmbeddingModel(EmbeddingModel):
     def __init__(self, model_name: str, device_ids: List[int] = None, use_fp16: bool = False):
         if torch.cuda.is_available():
             print(f"Using GPU for embedding: {torch.cuda.get_device_name(0)}")
-            self.device = 'cuda'
+            master = f"cuda:{device_ids[0]}" if device_ids else 'cuda'
+            self.device = master
             self.device_ids = device_ids
         else:
             print("Using CPU for embedding")
