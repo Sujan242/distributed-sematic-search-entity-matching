@@ -126,8 +126,8 @@ if __name__ == "__main__":
           ground_truth,
           tokenizer,
           args.topk,
-          args.nprobe,
           args.gpus,
+          args.nprobe,
           args.path_idx,
           args.path_ids
           )
