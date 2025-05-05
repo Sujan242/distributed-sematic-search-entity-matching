@@ -79,7 +79,7 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
         with open(path_ids, "rb") as f:
             tableA_ids = pickle.load(f)
 
-        faiss_index.nprobe = nprobe
+        faiss_index.nprobe = int(nprobe)
         print(f"[FAISS] Loaded index [{path_idx}] "
               f"with {faiss_index.ntotal} vectors, nprobe={nprobe}")
         return tableA_ids
@@ -112,7 +112,7 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
 
     faiss_index.add(all_embeddings)
     print(f"Added {all_embeddings.shape[0]} vectors to index")
-    faiss_index.nprobe = nprobe
+    faiss_index.nprobe = int(nprobe)
 
     # ---- (c) persist (CPU side) ------------------------------------- #
     faiss.write_index(faiss_index, path_idx)
