@@ -18,12 +18,12 @@ class CollatorWithID:
         batch['id'] = ids                      # reattach ids
         return batch
 
-def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k, gpus, path_idx=None, path_ids=None):
+def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_size, ground_truth, tokenizer, top_k, gpus,nprobe = 50, path_idx=None, path_ids=None):
     blocking_start = time.time()
     collator = CollatorWithID(tokenizer=tokenizer)
     print("Start building index...")
     build_start_time = time.time()
-    tableA_ids = build_index(first_dataset, batch_size, embedding_model, faiss_index, collator, path_idx=path_idx, path_ids=path_ids)
+    tableA_ids = build_index(first_dataset, batch_size, embedding_model, faiss_index, collator, nprobe = nprobe , path_idx=path_idx, path_ids=path_ids)
     build_end_time = time.time()
     index_search_start_time = time.time()
 

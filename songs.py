@@ -70,6 +70,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='Alibaba-NLP/gte-large-en-v1.5', help='Model name for embedding')
     parser.add_argument('--embedding_dim', type=int, default=1024, help='Embedding dimension')
     parser.add_argument('--use_fp16', action='store_true', help='Use fp16 for embedding model')
+    parser.add_argument('--nprobe', type=int, default=50, help='Number of probes for faiss index')
     parser.add_argument('--path_idx', type=str, default='songs_ivf.index', help='Path to save the index')
     parser.add_argument('--path_ids', type=str, default='songs_ids.pkl', help='Path to save the ids')
     args = parser.parse_args()
@@ -93,7 +94,7 @@ if __name__ == "__main__":
         download_csv(url="http://pages.cs.wisc.edu/~anhai/data/falcon_data/songs/matches_msd_msd.csv", local_filepath='./data/songs/Songs_perfectMapping.csv')
 
     print(
-        f"Start blocking for batch size:{batch_size},  gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}")
+        f"Start blocking for batch size:{batch_size},  gpus: {args.gpus}, topk: {args.topk}, model: {args.model}, embedding_dim: {args.embedding_dim}, use_fp16: {args.use_fp16}, nprobe: {args.nprobe}, path_idx: {args.path_idx}, path_ids: {args.path_ids}")
 
     # build index for table-A
     embedding_model = SentenceTransformerEmbeddingModel(args.model, device_ids=args.gpus, use_fp16=args.use_fp16)
@@ -125,6 +126,7 @@ if __name__ == "__main__":
           ground_truth,
           tokenizer,
           args.topk,
+          args.nprobe,
           args.gpus,
           args.path_idx,
           args.path_ids
