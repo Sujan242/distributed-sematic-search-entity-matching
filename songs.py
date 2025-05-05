@@ -70,6 +70,8 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='Alibaba-NLP/gte-large-en-v1.5', help='Model name for embedding')
     parser.add_argument('--embedding_dim', type=int, default=1024, help='Embedding dimension')
     parser.add_argument('--use_fp16', action='store_true', help='Use fp16 for embedding model')
+    parser.add_argument('--path_idx', type=str, default='songs_ivf.index', help='Path to save the index')
+    parser.add_argument('--path_ids', type=str, default='songs_ids.pkl', help='Path to save the ids')
     args = parser.parse_args()
     batch_size = args.batch_size
 
@@ -123,5 +125,7 @@ if __name__ == "__main__":
           ground_truth,
           tokenizer,
           args.topk,
-          args.gpus
+          args.gpus,
+          args.path_idx,
+          args.path_ids
           )

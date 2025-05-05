@@ -3,10 +3,90 @@ import faiss
 from utils.dataset import BaseDataset
 from utils.embedding_model import EmbeddingModel
 import torch
+import pickle
+import os
+import numpy as np
 import faiss.contrib.torch_utils # need this for GPU support even though you don't use it
 
-def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index, collator, nprobe = 100):
+# def build_index(dataset: BaseDataset, batch_size: int, embedding_model: EmbeddingModel, faiss_index, collator, nprobe = 100):
 
+#     dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True, collate_fn=collator)
+#     tableA_ids = []
+#     # all_embeddings = []
+#     initial_embeddings = []
+#     all_emb_batches = []
+
+#     # 1) Embed everything and collect IDs
+#     for batch in dataloader:
+#         ids       = batch['id']
+#         emb_torch = embedding_model.get_embedding(batch)     # on GPU (if you drop .cpu())
+#         emb_cpu   = emb_torch.detach().cpu()                 # move to host
+#         tableA_ids.extend(ids)
+#         all_emb_batches.append(emb_cpu)
+
+#     # 2) Concatenate into one big array
+#     all_embeddings = torch.cat(all_emb_batches, dim=0).numpy().astype('float32')
+#     # shape = (N_total, embedding_dim)
+
+#     # 3) Train on *all* embeddings
+#     faiss_index.train(all_embeddings)
+#     print(f"Trained IVF on {all_embeddings.shape[0]} vectors")
+#     # 4) Add all embeddings to the index
+
+#     faiss_index.add(all_embeddings)
+#     print(f"Added {all_embeddings.shape[0]} vectors to index")
+#     faiss_index.nprobe = 50
+#     # for batch in dataloader:
+#     #     ids = batch['id']
+#     #     embeddings = embedding_model.get_embedding(batch)
+#     #     if faiss_index.is_trained:
+#     #         faiss_index.add(embeddings)
+#     #     else:
+#     #         if len(initial_embeddings) <= (80000/batch_size):
+#     #             initial_embeddings.append(embeddings)
+#     #         else:
+#     #             initial_embeddings = torch.cat(initial_embeddings, dim=0)
+#     #             faiss_index.train(initial_embeddings)
+#     #             print("trained faiss index")
+#         # all_embeddings.append(embeddings)
+#     #     tableA_ids.extend(ids)
+#     #
+#     # all_embeddings = torch.cat(all_embeddings, dim=0)
+#     # all_embeddings = all_embeddings.contiguous()
+#     print("Done building index")
+#     return tableA_ids
+
+def build_index(dataset, batch_size, embedding_model, faiss_index,
+                collator,
+                nprobe   = 100,
+                path_idx = "songs_ivf.index",
+                path_ids = "songs_ids.pkl",
+                overwrite=False):
+    """
+    Returns
+    -------
+    faiss_index : trained & populated index (nprobe already set)
+    id_list     : Python list same length as database vectors
+    """
+
+    # ------------------------------------------------------------------ #
+    # 1) Fast path: re-use saved artefacts
+    # ------------------------------------------------------------------ #
+    if (not overwrite and
+        os.path.isfile(path_idx) and
+        os.path.isfile(path_ids)):
+        faiss_index = faiss.read_index(path_idx)
+        with open(path_ids, "rb") as f:
+            tableA_ids = pickle.load(f)
+
+        faiss_index.nprobe = nprobe
+        print(f"[FAISS] Loaded index [{path_idx}] "
+              f"with {faiss_index.ntotal} vectors, nprobe={nprobe}")
+        return tableA_ids
+
+    # ------------------------------------------------------------------ #
+    # 2) Build from scratch
+    # ------------------------------------------------------------------ #
     dataloader = DataLoader(dataset, batch_size=batch_size, pin_memory=True, collate_fn=collator)
     tableA_ids = []
     # all_embeddings = []
@@ -33,23 +113,13 @@ def build_index(dataset: BaseDataset, batch_size: int, embedding_model: Embeddin
     faiss_index.add(all_embeddings)
     print(f"Added {all_embeddings.shape[0]} vectors to index")
     faiss_index.nprobe = 50
-    # for batch in dataloader:
-    #     ids = batch['id']
-    #     embeddings = embedding_model.get_embedding(batch)
-    #     if faiss_index.is_trained:
-    #         faiss_index.add(embeddings)
-    #     else:
-    #         if len(initial_embeddings) <= (80000/batch_size):
-    #             initial_embeddings.append(embeddings)
-    #         else:
-    #             initial_embeddings = torch.cat(initial_embeddings, dim=0)
-    #             faiss_index.train(initial_embeddings)
-    #             print("trained faiss index")
-        # all_embeddings.append(embeddings)
-    #     tableA_ids.extend(ids)
-    #
-    # all_embeddings = torch.cat(all_embeddings, dim=0)
-    # all_embeddings = all_embeddings.contiguous()
+
+    # ---- (c) persist (CPU side) ------------------------------------- #
+    faiss.write_index(faiss_index, path_idx)
+    with open(path_ids, "wb") as f:
+        pickle.dump(tableA_ids, f)
+    print(f"[FAISS] Saved index → {path_idx}")
+    print(f"[FAISS] Saved id list → {path_ids}")
     print("Done building index")
     return tableA_ids
 
