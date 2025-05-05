@@ -112,9 +112,11 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
 
     faiss_index.add(all_embeddings)
     print(f"Added {all_embeddings.shape[0]} vectors to index")
-    if faiss.index_is_on_gpu(faiss_index):          # True → GPU
+    try:
+    # will succeed only if faiss_index is a GPU index
         faiss_index_cpu = faiss.index_gpu_to_cpu(faiss_index)
-    else:
+    except Exception:  
+    # if it wasn’t on GPU, index_gpu_to_cpu raises FaissException
         faiss_index_cpu = faiss_index
 
 # now it is a plain CPU IndexIVFFlat / IndexIDMap2
