@@ -112,10 +112,17 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
 
     faiss_index.add(all_embeddings)
     print(f"Added {all_embeddings.shape[0]} vectors to index")
+    if faiss.index_is_on_gpu(faiss_index):          # True → GPU
+        faiss_index_cpu = faiss.index_gpu_to_cpu(faiss_index)
+    else:
+        faiss_index_cpu = faiss_index
+
+# now it is a plain CPU IndexIVFFlat / IndexIDMap2
+    faiss.write_index(faiss_index_cpu, path_idx)
+    
     faiss_index.nprobe = int(nprobe)
 
     # ---- (c) persist (CPU side) ------------------------------------- #
-    faiss.write_index(faiss_index, path_idx)
     with open(path_ids, "wb") as f:
         pickle.dump(tableA_ids, f)
     print(f"[FAISS] Saved index → {path_idx}")
