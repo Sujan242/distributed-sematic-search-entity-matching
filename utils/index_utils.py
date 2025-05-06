@@ -82,7 +82,7 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
         faiss_index.nprobe = int(nprobe)
         print(f"[FAISS] Loaded index [{path_idx}] "
               f"with {faiss_index.ntotal} vectors, nprobe={nprobe}")
-        return tableA_ids
+        return faiss_index, tableA_ids 
 
     # ------------------------------------------------------------------ #
     # 2) Build from scratch
@@ -122,7 +122,7 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
 # now it is a plain CPU IndexIVFFlat / IndexIDMap2
     faiss.write_index(faiss_index_cpu, path_idx)
     
-    faiss_index.nprobe = int(nprobe)
+    faiss_index_cpu.nprobe = int(nprobe)
 
     # ---- (c) persist (CPU side) ------------------------------------- #
     with open(path_ids, "wb") as f:
@@ -130,7 +130,7 @@ def build_index(dataset, batch_size, embedding_model, faiss_index,
     print(f"[FAISS] Saved index → {path_idx}")
     print(f"[FAISS] Saved id list → {path_ids}")
     print("Done building index")
-    return tableA_ids
+    return faiss_index_cpu, tableA_ids
 
 
 def search_index(dataset: BaseDataset, batch_size: int,

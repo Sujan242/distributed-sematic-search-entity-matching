@@ -23,7 +23,7 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     collator = CollatorWithID(tokenizer=tokenizer)
     print("Start building index...")
     build_start_time = time.time()
-    tableA_ids = build_index(first_dataset, batch_size, embedding_model, faiss_index, collator, nprobe = nprobe , path_idx=path_idx, path_ids=path_ids)
+    faiss_index, tableA_ids  = build_index(first_dataset, batch_size, embedding_model, faiss_index, collator, nprobe = nprobe , path_idx=path_idx, path_ids=path_ids)
     build_end_time = time.time()
     index_search_start_time = time.time()
 
@@ -32,7 +32,11 @@ def block(first_dataset, second_dataset, embedding_model, faiss_index, batch_siz
     if torch.cuda.is_available() and len(gpus) > 1:
         cloner_options = faiss.GpuMultipleClonerOptions()
         cloner_options.shard = False
-        faiss_cpu_index = faiss.index_gpu_to_cpu(faiss_index)
+        try:
+            faiss_cpu_index = faiss.index_gpu_to_cpu(faiss_index)
+        except Exception:  
+    # if it wasn’t on GPU, index_gpu_to_cpu raises FaissException
+            faiss_cpu_index = faiss_index
         faiss_index = faiss.index_cpu_to_gpus_list(faiss_cpu_index, gpus=gpus, co=cloner_options)
 
     print("Start searching...")
